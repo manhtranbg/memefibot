@@ -147,56 +147,7 @@ async def activate_energy_recharge_booster(index,headers):
                 print(f"❌ Gagal dengan status {response.status}, mencoba lagi..." + response)
                 return None  # Mengembalikan None jika terjadi error
     
-async def activate_booster(index, headers):
-    access_token = await fetch(index + 1)
-    url = "https://api-gw-tg.memefi.club/graphql"
-    print("\r🚀 Mengaktifkan Turbo Boost ... ", end="", flush=True)
 
-    headers = headers_set.copy()  # Membuat salinan headers_set agar tidak mengubah variabel global
-    headers['Authorization'] = f'Bearer {access_token}'
-
-    recharge_booster_payload = {
-        "operationName": "telegramGameActivateBooster",
-        "variables": {"boosterType": "Turbo"},
-        "query": QUERY_BOOSTER
-    }
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, headers=headers, json=recharge_booster_payload) as response:
-            if response.status == 200:
-                response_data = await response.json()
-                current_health = response_data['data']['telegramGameActivateBooster']['currentBoss']['currentHealth']
-                if current_health == 0:
-                    print("\nBos telah dikalahkan, mengatur bos berikutnya...")
-                    await set_next_boss(index, headers)
-                else:
-                    if god_mode == 'y':
-                        total_hit = 50000000
-                    else:
-                        total_hit = 50000
-                    tap_payload = {
-                        "operationName": "MutationGameProcessTapsBatch",
-                        "variables": {
-                            "payload": {
-                                "nonce": generate_random_nonce(),
-                                "tapsCount": total_hit
-                            }
-                        },
-                        "query": MUTATION_GAME_PROCESS_TAPS_BATCH
-                    }
-                    for _ in range(25):
-                        tap_result = await submit_taps(index, tap_payload)
-                        if tap_result is not None:
-                            if 'data' in tap_result and 'telegramGameProcessTapsBatch' in tap_result['data']:
-                                tap_data = tap_result['data']['telegramGameProcessTapsBatch']
-                                if tap_data['currentBoss']['currentHealth'] == 0:
-                                    print("\nBos telah dikalahkan, mengatur bos berikutnya...")
-                                    await set_next_boss(index, headers)
-                                    print(f"\rTapped ✅ Coin: {tap_data['coinsAmount']}, Monster ⚔️: {tap_data['currentBoss']['currentHealth']} - {tap_data['currentBoss']['maxHealth']}    ")
-                        else:
-                            print(f"❌ Gagal dengan status {tap_result}, mencoba lagi...")
-            else:
-                print(f"❌ Gagal dengan status {response.status}, mencoba lagi...")
-                return None  # Mengembalikan None jika terjadi error
 
 async def submit_taps(index, json_payload):
     access_token = await fetch(index + 1)
@@ -417,9 +368,9 @@ async def main():
     
 
                                
-                if level_bos == 11 and darah_bos == 0:
-                    print(f"\n=================== {first_name} {last_name} TAMAT ====================")
-                    continue
+                # if level_bos == 11 and darah_bos == 0:
+                #     print(f"\n=================== {first_name} {last_name} TAMAT ====================")
+                #     continue
                 if darah_bos == 0:
                     print("\nBos telah dikalahkan, mengatur bos berikutnya...", flush=True)
                     await set_next_boss(index, headers)
@@ -438,7 +389,7 @@ async def main():
                             continue  # Lanjutkan tapping setelah recharge
                         else:
                             print("\r🪫 Energy Habis, tidak ada booster tersedia. Beralih ke akun berikutnya.\n", flush=True)
-                            
+                            break
                     else:
                         print("\r🪫 Energy Habis, auto booster disable. Beralih ke akun berikutnya.\n", flush=True)
                         
@@ -461,10 +412,9 @@ async def main():
                 else:
                     print(f"❌ Gagal dengan status {tap_result}, mencoba lagi...")
 
-                if turbo_booster == 'y':
-                    if user_data['freeBoosts']['currentTurboAmount'] > 0:
-                        await activate_booster(index, headers)
-                      #  activate_turbo_boost(headers)
+                if auto_claim_combo == 'y':
+                    await claim_combo(index, headers)
+  
                   
 
 
@@ -472,7 +422,86 @@ async def main():
     
         animate_energy_recharge(15)   
         
-  
+async def claim_combo(index, headers):
+    access_token = await fetch(index + 1)
+    url = "https://api-gw-tg.memefi.club/graphql"
+    headers = headers_set.copy()  # Membuat salinan headers_set agar tidak mengubah variabel global
+    headers['Authorization'] = f'Bearer {access_token}'
+
+    # Membuat nonce dan tapsCount dinamis
+    nonce = generate_random_nonce()
+    taps_count = random.randint(5, 10)  # Contoh: tapsCount dinamis antara 5 dan 10
+    # vector diambil dari input pengguna
+    claim_combo_payload = {
+        "operationName": "MutationGameProcessTapsBatch",
+        "variables": {
+            "payload": {
+                "nonce": nonce,
+                "tapsCount": taps_count,
+                "vector": vector
+            }
+        },
+        "query": """
+        mutation MutationGameProcessTapsBatch($payload: TelegramGameTapsBatchInput!) {
+          telegramGameProcessTapsBatch(payload: $payload) {
+            ...FragmentBossFightConfig
+            __typename
+          }
+        }
+
+        fragment FragmentBossFightConfig on TelegramGameConfigOutput {
+          _id
+          coinsAmount
+          currentEnergy
+          maxEnergy
+          weaponLevel
+          zonesCount
+          tapsReward
+          energyLimitLevel
+          energyRechargeLevel
+          tapBotLevel
+          currentBoss {
+            _id
+            level
+            currentHealth
+            maxHealth
+            __typename
+          }
+          freeBoosts {
+            _id
+            currentTurboAmount
+            maxTurboAmount
+            turboLastActivatedAt
+            turboAmountLastRechargeDate
+            currentRefillEnergyAmount
+            maxRefillEnergyAmount
+            refillEnergyLastActivatedAt
+            refillEnergyAmountLastRechargeDate
+            __typename
+          }
+          bonusLeaderDamageEndAt
+          bonusLeaderDamageStartAt
+          bonusLeaderDamageMultiplier
+          nonce
+          __typename
+        }
+        """
+    }
+
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers=headers, json=claim_combo_payload) as response:
+            if response.status == 200:
+                response_data = await response.json()
+                if 'data' in response_data and 'telegramGameProcessTapsBatch' in response_data['data']:
+                    game_data = response_data['data']['telegramGameProcessTapsBatch']
+                    if game_data['tapsReward'] is None:
+                        print("❌ Combo sudah pernah diklaim: Tidak ada reward yang tersedia.")
+                    else:
+                        print(f"✅ Combo diklaim dengan sukses: Reward taps {game_data['tapsReward']}")
+                else:
+                    print("❌ Gagal mengklaim combo: Data tidak lengkap atau tidak ada.")
+
+                      
 def animate_energy_recharge(duration):
     frames = ["|", "/", "-", "\\"]
     end_time = time.time() + duration
@@ -498,22 +527,25 @@ while True:
     else:
         print("Masukkan 'y' atau 'n'.")
 
+
 while True:
-    turbo_booster = input("Use Turbo Booster (default n) ? (y/n): ").strip().lower()
-    if turbo_booster in ['y', 'n', '']:
-        turbo_booster = turbo_booster or 'n'
+    auto_claim_combo = input("Auto claim daily combo (default n) ? (y/n): ").strip().lower()
+    if auto_claim_combo in ['y', 'n', '']:
+        auto_claim_combo = auto_claim_combo or 'n'
         break
     else:
         print("Masukkan 'y' atau 'n'.")
 
-if turbo_booster == 'y':
+if auto_claim_combo == 'y':
     while True:
-        god_mode = input("Activate God Mode (1x tap monster dead) ? (y/n): ").strip().lower()
-        if god_mode in ['y', 'n', '']:
-            god_mode = god_mode or 'n'
+        combo_input = input("Masukkan combo (misal: 1,3,2,4,4,3,2,1): ").strip()
+        if combo_input:
+            vector = combo_input
             break
         else:
-            print("Masukkan 'y' atau 'n'.")
+            print("Masukkan combo yang valid.")
+
+
 # Jalankan fungsi main() dan simpan hasilnya
 asyncio.run(main())
 
