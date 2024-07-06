@@ -355,7 +355,7 @@ async def main():
             if stat_result is not None:
                 user_data = stat_result
                 output = (
-                    f"[ Akun {index + 1} - {first_name} {last_name} ]\n"
+                    f"[ Hesap {index + 1} - {first_name} {last_name} ]\n"
                     f"Coin 🪙  {user_data['coinsAmount']:,} 🔋 {user_data['currentEnergy']} - {user_data['maxEnergy']}\n"
                     f"Level 🔫 {user_data['weaponLevel']} 🔋 {user_data['energyLimitLevel']} ⚡ {user_data['energyRechargeLevel']} 🤖 {user_data['tapBotLevel']}\n"
                     f"Boss 👾 {user_data['currentBoss']['level']} ❤️ {user_data['currentBoss']['currentHealth']} - {user_data['currentBoss']['maxHealth']}\n"
