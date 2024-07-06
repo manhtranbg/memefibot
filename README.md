@@ -12,24 +12,24 @@ Install with python
 ```bash
   1. İndir Python 3.10+
   2. Kurulacak Modül (pip install pytz aiohttp)
-  3. Botu Telegram masaüstünde açın (göründüğünde cep telefonunuzda açmasını söyleyin) > denetle > Uygulama
+  3. Botu Telegram masaüstünde açın (açılan pencerede sağ tıklayın) > denetle > Application a tıklayın
   4. Session Storage > seç  anahtar __telegram_initParams
   5. Bulunacak bölüm tgwebAppdata > value yi kopyala  (query_idxxxxxxxxxxxx) TAMAMIMI KOPYALA !
   6. query_id.txt (1 satır 1 hesap) içine yapıştır
 ```
 
 
-## Features
+## Özellikler
 - Fitur God Mode (1x Tap Bos mati)
-- Auto Refresh Token
-- Auto Use Booster Energy 
-- Auto Use Booster Tap 
-- Auto Change Boss 
-- Auto Total Tap Count
-- Multi Account
-- Tanpa APP_ID Telegram
+- Otomatik yenileme Token
+- Otomatik Booster Enerji Kullanımı
+- Otomatik Booster Tap Kullanımı
+- Otomatik Patron değiştirme
+- Otomatik Toplam tıklama sayacı
+- Çoklu Hesap
+- APP_ID Telegram gerek yok
 
-## Screenshots
+## Ekran Görüntüsü
 
 ![App Screenshot](https://i.ibb.co.com/7vsVvDW/turbo.gif)
 
