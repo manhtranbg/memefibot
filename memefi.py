@@ -14,7 +14,7 @@ from utils.queries import QUERY_TASK_VERIF, QUERY_TASK_COMPLETED, QUERY_GET_TASK
 
 url = "https://api-gw-tg.memefi.club/graphql"
 
-# HANDLE SEMUA ERROR TAROH DISINI BANG SAFE_POST
+# TÜM TAROH HATALARINI BURADA ELE ALIN BANG SAFE_POST
 async def safe_post(session, url, headers, json_payload):
     retries = 5
     for attempt in range(retries):
@@ -23,7 +23,7 @@ async def safe_post(session, url, headers, json_payload):
                 return await response.json()  # Return the JSON response if successful
             else:
                 print(f"❌ Gagal dengan status {response.status}, mencoba lagi ")
-                if attempt < retries - 1:  # Jika ini bukan percobaan terakhir, tunggu sebelum mencoba lagi
+                if attempt < retries - 1:  # Bu son denemeniz değilse, tekrar denemeden önce bekleyin
                     await asyncio.sleep(10)
                 else:
                     print("❌ Gagal setelah beberapa percobaan. Memulai ulang...")
@@ -52,7 +52,7 @@ async def fetch(account_line):
     user_data_dict = json.loads(unquote(user_data))
 
     url = 'https://api-gw-tg.memefi.club/graphql'
-    headers = headers_set.copy()  # Membuat salinan headers_set agar tidak mengubah variabel global
+    headers = headers_set.copy()  # Genel değişkenleri değiştirmemek içinheaders_set'in bir kopyasını oluşturun
     data = {
         "operationName": "MutationTelegramUserLogin",
         "variables": {
@@ -95,7 +95,7 @@ async def cek_user(index):
     access_token = await fetch(index + 1)
     url = "https://api-gw-tg.memefi.club/graphql"
 
-    headers = headers_set.copy()  # Membuat salinan headers_set agar tidak mengubah variabel global
+    headers = headers_set.copy()  # Genel değişkenleri değiştirmemek içinheaders_set'in bir kopyasını oluşturun
     headers['Authorization'] = f'Bearer {access_token}'
     
     json_payload = {
@@ -109,14 +109,14 @@ async def cek_user(index):
             if response.status == 200:
                 response_data = await response.json()
                 if 'errors' in response_data:
-                    print(f"❌ Gagal Query ID Salah")
+                    print(f"❌ başarısız Yanlış Kimlik Sorgulama")
                     return None
                 else:
                     user_data = response_data['data']['telegramUserMe']
                     return user_data  # Mengembalikan hasil response
             else:
                 print(response)
-                print(f"❌ Gagal dengan status {response.status}, mencoba lagi...")
+                print(f"❌ Durumla ilgili başarısız oldu {response.status}, tekrar deneyin...")
                 return None  # Mengembalikan None jika terjadi error
             
 async def activate_energy_recharge_booster(index,headers):
@@ -139,12 +139,12 @@ async def activate_energy_recharge_booster(index,headers):
                 response_data = await response.json()
                 if response_data and 'data' in response_data and response_data['data'] and 'telegramGameActivateBooster' in response_data['data']:
                     new_energy = response_data['data']['telegramGameActivateBooster']['currentEnergy']
-                    print(f"\n🔋 Energi terisi. Energi saat ini: {new_energy}")
+                    print(f"\n🔋 Enerji doldu. Mevcut enerji: {new_energy}")
                 else:
-                    print("❌ Gagal mengaktifkan Recharge Booster: Data tidak lengkap atau tidak ada.")
+                    print("❌ Şarj Hızlandırıcı etkinleştirilemedi: Eksik veya eksik veriler..")
             else:
                 # print(response)
-                print(f"❌ Gagal dengan status {response.status}, mencoba lagi..." + response)
+                print(f"❌ Durumla ilgili başarısız oldu {response.status}, tekrar deneyin...." + response)
                 return None  # Mengembalikan None jika terjadi error
     
 
@@ -162,7 +162,7 @@ async def submit_taps(index, json_payload):
                 response_data = await response.json()
                 return response_data  # Pastikan mengembalikan data yang sudah diurai
             else:
-                print(f"❌ Gagal dengan status {response}, mencoba lagi...")
+                print(f"❌ Durumla ilgili başarısız oldu {response}, tekrar deneyin...")
                 return None  # Mengembalikan None jika terjadi error
 async def set_next_boss(index, headers):
     access_token = await fetch(index + 1)
@@ -179,9 +179,9 @@ async def set_next_boss(index, headers):
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=headers, json=boss_payload) as response:
             if response.status == 200:
-                print("✅ Berhasil ganti bos.", flush=True)
+                print("✅ Patron başarıyla değiştirildi.", flush=True)
             else:
-                print("❌ Gagal ganti bos.", flush=True)
+                print("❌ Patron değiştirilemedi.", flush=True)
                  # Mengembalikan respons error
 
 # cek stat
@@ -217,7 +217,7 @@ async def cek_stat(index,headers):
 
 async def check_and_complete_tasks(index, headers):
     # if tasks_completed.get(account_number, False):
-    #     print(f"[ Akun {account_number + 1} ] Semua tugas telah selesai. Tidak perlu cek lagi. ✅")
+    #     print(f"[ Hesap {account_number + 1} ] Tüm görevler tamamlandı. Tekrar kontrol etmeye gerek yok. ✅")
     #     return True
     access_token = await fetch(index + 1)
     headers = headers_set.copy()  # Membuat salinan headers_set agar tidak mengubah variabel global
@@ -232,33 +232,33 @@ async def check_and_complete_tasks(index, headers):
         async with session.post(url, json=task_list_payload, headers=headers) as response:
             if response.status != 200:
                 # Menampilkan status dan respons jika bukan 200 OK
-                print(f"❌ Gagal dengan status {response.status}")
+                print(f"❌ Durumla ilgili başarısız oldu {response.status}")
                 print(await response.text())  # Menampilkan respons teks untuk debugging
                 return False
 
             try:
                 tasks = await response.json()
             except aiohttp.ContentTypeError:
-                print("Gagal mengurai JSON, cek respons server.")
+                print("JSON ayrıştırılamadı, sunucu yanıtını kontrol edin.")
                 return False
 
             # Lanjutkan dengan logika yang ada jika tidak ada error
             all_completed = all(task['status'] == 'Completed' for task in tasks['data']['campaignTasks'])
             if all_completed:
-                print(f"\r[ Akun {index + 1} ] Semua tugas telah selesai. ✅            ",flush=True)
+                print(f"\r[ Hesap {index + 1} ] Tüm görevler tamamlandı. ✅            ",flush=True)
                 return True
 
 
-            print(f"\n[ Akun {index + 1} ]\nList Task:\n")
+            print(f"\n[ Hesap {index + 1} ]\nList Task:\n")
             for task in tasks['data']['campaignTasks']:
                 print(f"{task['name']} | {task['status']}")
 
                 if task['name'] == "Follow telegram channel" and task['status'] == "Pending":
-                    print(f"⏩ Skipping task: {task['name']}")
+                    print(f"⏩ Görev atlanıyor: {task['name']}")
                     continue  # Skip task jika nama task adalah "Follow telegram channel" dan statusnya "Pending"
 
                 if task['status'] == "Pending":
-                    print(f"\🔍 Viewing task: {task['name']}", end="", flush=True)
+                    print(f"\🔍 Görev görüntüleniyor: {task['name']}", end="", flush=True)
                  
                     view_task_payload = {"operationName":"GetTaskById","variables":{"taskId":task['id']},"query":"fragment FragmentCampaignTask on CampaignTaskOutput {\n  id\n  name\n  description\n  status\n  type\n  position\n  buttonText\n  coinsRewardAmount\n  link\n  userTaskId\n  isRequired\n  iconUrl\n  __typename\n}\n\nquery GetTaskById($taskId: String!) {\n  campaignTaskGetConfig(taskId: $taskId) {\n    ...FragmentCampaignTask\n    __typename\n  }\n}"}
                     print(view_task_payload)
@@ -266,15 +266,15 @@ async def check_and_complete_tasks(index, headers):
                         view_result = await view_response.json()
 
                         if 'errors' in view_result:
-                            print(f"\r❌ Gagal mendapatkan detail task: {task['name']}")
+                            print(f"\r❌ Görev ayrıntıları alınamadı: {task['name']}")
                             print(view_result)
                         else:
                             task_details = view_result['data']['campaignTaskGetConfig']
-                            print(f"\r🔍 Detail Task: {task_details['name']}", end="", flush=True)
+                            print(f"\r🔍 Görev Detayı: {task_details['name']}", end="", flush=True)
 
                     await asyncio.sleep(2)  # Jeda 2 detik setelah melihat detail
 
-                    print(f"\r🔍 Verifikasi task: {task['name']}                                                                ", end="", flush=True)
+                    print(f"\r🔍 Görevleri doğrula: {task['name']}                                                                ", end="", flush=True)
                     verify_task_payload = {
                         "operationName": "CampaignTaskToVerification",
                         "variables": {"userTaskId": task['userTaskId']},
@@ -284,9 +284,9 @@ async def check_and_complete_tasks(index, headers):
                         verify_result = await verify_response.json()
 
                         if 'errors' not in verify_result:
-                            print(f"\r✅ {task['name']} | Moved to Verification", flush=True)
+                            print(f"\r✅ {task['name']} | Doğrulamaya Taşındı", flush=True)
                         else:
-                            print(f"\r❌ {task['name']} | Failed to move to Verification", flush=True)
+                            print(f"\r❌ {task['name']} | Doğrulama'ya taşınamadı", flush=True)
                             print(verify_result)
 
                     await asyncio.sleep(2)  # Jeda 2 detik setelah verifikasi
@@ -295,11 +295,11 @@ async def check_and_complete_tasks(index, headers):
             async with session.post(url, json=task_list_payload, headers=headers) as response:
                 updated_tasks = await response.json()
 
-                print("\nUpdated Task List After Verification:\n")
+                print("\nDoğrulamadan Sonra Güncellenen Görev Listesi:\n")
                 for task in updated_tasks['data']['campaignTasks']:
                     print(f"{task['name']} | {task['status']}")
                     if task['status'] == "Verification":
-                        print(f"\r🔥 Menyelesaikan task: {task['name']}", end="", flush=True)
+                        print(f"\r🔥 Görevleri tamamla: {task['name']}", end="", flush=True)
                         complete_task_payload = {
                             "operationName": "CampaignTaskCompleted",
                             "variables": {"userTaskId": task['userTaskId']},
@@ -309,17 +309,17 @@ async def check_and_complete_tasks(index, headers):
                             complete_result = await complete_response.json()
 
                             if 'errors' not in complete_result:
-                                print(f"\r✅ {task['name']} | Completed                         ", flush=True)
+                                print(f"\r✅ {task['name']} | Tamamlandı                         ", flush=True)
                             else:
-                                print(f"\r❌ {task['name']} | Failed to complete            ", flush=True)
+                                print(f"\r❌ {task['name']} | Tamamlanamadı            ", flush=True)
                     
                     await asyncio.sleep(3)  # Jeda 3 detik setelah menyelesaikan tugas
 
     return False
 
 async def main():
-    print("Starting Memefi bot...")
-    print("\r Mendapatkan list akun valid...", end="", flush=True)
+    print("🇹‌🇷‌🇪‌🇩‌🇮‌🇳‌🇮‌🇺‌🇲‌ Memefi bot BAŞLIYOR...")
+    print("\r Geçerli hesapların listesini alın...", end="", flush=True)
     while True:
         with open('query_id.txt', 'r') as file:
             lines = file.readlines()
@@ -334,22 +334,22 @@ async def main():
                 league = result.get('league', 'Unknown')
                 accounts.append((index, result, first_name, last_name, league))
             else:
-                print(f"❌ Akun {index + 1}: Token tidak valid atau terjadi kesalahan")
+                print(f"❌ Hesap {index + 1}: Belirteç geçersiz veya bir hata oluştu")
 
         # Menampilkan daftar akun
-        print("\rList akun:                                   ",flush=True)
+        print("\rListe Hesap:                                   ",flush=True)
         for index, _, first_name, last_name, league in accounts:
-            print(f"✅ [ Akun {first_name} {last_name} ] | League 🏆 {league}")
+            print(f"✅ [ Hesap {first_name} {last_name} ] | League 🏆 {league}")
 
         # Setelah menampilkan semua akun, mulai memeriksa tugas
         for index, result, first_name, last_name, league in accounts:
             
-            print(f"\r[ Akun {index + 1} ] {first_name} {last_name} memeriksa task...", end="", flush=True)
+            print(f"\r[ Hesap {index + 1} ] {first_name} {last_name} görevleri kontrol et...", end="", flush=True)
             headers = {'Authorization': f'Bearer {result}'}
             if cek_task_enable == 'y':
                 await check_and_complete_tasks(index, headers)
             else:
-                print(f"\r\n[ Akun {index + 1} ] {first_name} {last_name} Cek task skipped\n", flush=True)
+                print(f"\r\n[ Hesap {index + 1} ] {first_name} {last_name} Çek görevi atlandı\n", flush=True)
             stat_result = await cek_stat(index, headers)
 
             if stat_result is not None:
@@ -372,7 +372,7 @@ async def main():
                 #     print(f"\n=================== {first_name} {last_name} TAMAT ====================")
                 #     continue
                 if darah_bos == 0:
-                    print("\nBos telah dikalahkan, mengatur bos berikutnya...", flush=True)
+                    print("\nPatron yenildi, bir sonraki patronu ayarla...", flush=True)
                     await set_next_boss(index, headers)
                 print("\rTapping 👆", end="", flush=True)
 
@@ -384,14 +384,14 @@ async def main():
                 if energy_sekarang < 0.25 * user_data['maxEnergy']:
                     if auto_booster == 'y':
                         if user_data['freeBoosts']['currentRefillEnergyAmount'] > 0:
-                            print("\r🪫 Energy Habis, mengaktifkan Recharge Booster... \n", end="", flush=True)
+                            print("\r🪫 Enerji Tükendi, Yeniden Şarj Hızlandırıcıyı etkinleştirin... \n", end="", flush=True)
                             await activate_energy_recharge_booster(index, headers)
                             continue  # Lanjutkan tapping setelah recharge
                         else:
-                            print("\r🪫 Energy Habis, tidak ada booster tersedia. Beralih ke akun berikutnya.\n", flush=True)
+                            print("\r🪫 EEnerji Çıkışı, güçlendirici mevcut değil. Sonraki hesaba geç.\n", flush=True)
                             break
                     else:
-                        print("\r🪫 Energy Habis, auto booster disable. Beralih ke akun berikutnya.\n", flush=True)
+                        print("\r🪫 Enerji Tükendi, otomatik güçlendirici devre dışı. Sonraki hesaba geç.\n", flush=True)
                         
  
 
@@ -410,7 +410,7 @@ async def main():
                 if tap_result is not None:
                     print(f"\rTapped ✅\n ")
                 else:
-                    print(f"❌ Gagal dengan status {tap_result}, mencoba lagi...")
+                    print(f"❌ Durumla ilgili başarısız oldu {tap_result}, tekrar deneyin...")
 
                 if auto_claim_combo == 'y':
                     await claim_combo(index, headers)
@@ -418,7 +418,7 @@ async def main():
                   
 
 
-        print("=== [ SEMUA AKUN TELAH DI PROSES ] ===")
+        print("=== [ TÜM HESAPLAR İŞLENDİ ] ===")
     
         animate_energy_recharge(15)   
         
@@ -495,11 +495,11 @@ async def claim_combo(index, headers):
                 if 'data' in response_data and 'telegramGameProcessTapsBatch' in response_data['data']:
                     game_data = response_data['data']['telegramGameProcessTapsBatch']
                     if game_data['tapsReward'] is None:
-                        print("❌ Combo sudah pernah diklaim: Tidak ada reward yang tersedia.")
+                        print("❌ Kombinasyon zaten talep edildi: Ödül mevcut değil.")
                     else:
-                        print(f"✅ Combo diklaim dengan sukses: Reward taps {game_data['tapsReward']}")
+                        print(f"✅ Kombinasyon başarıyla alındı: Ödül dokunuşları {game_data['tapsReward']}")
                 else:
-                    print("❌ Gagal mengklaim combo: Data tidak lengkap atau tidak ada.")
+                    print("❌ Kombinasyon talep edilemedi: Eksik veya eksik veriler.")
 
                       
 def animate_energy_recharge(duration):
@@ -508,42 +508,42 @@ def animate_energy_recharge(duration):
     while time.time() < end_time:
         remaining_time = int(end_time - time.time())
         for frame in frames:
-            print(f"\r🪫 Mengisi ulang energi {frame} - Tersisa {remaining_time} detik         ", end="", flush=True)
+            print(f"\r🪫 MEnerjiyi yeniden doldurun {frame} - Kalan {remaining_time} detik         ", end="", flush=True)
             time.sleep(0.25)
-    print("\r🔋 Pengisian energi selesai.                            ", flush=True)     
+    print("\r🔋 Enerji Doldu.                            ", flush=True)     
 # while True:
 #     cek_task_enable = input("Cek Task (default n) ? (y/n): ").strip().lower()
 #     if cek_task_enable in ['y', 'n', '']:
 #         cek_task_enable = cek_task_enable or 'n'
 #         break
 #     else:
-#         print("Masukkan 'y' atau 'n'.")
+#         print("Giriş yap 'y' yada 'n'.")
 cek_task_enable = 'n'
 while True:
-    auto_booster = input("Use Energy Booster (default n) ? (y/n): ").strip().lower()
+    auto_booster = input("Enerji Booster kullanılsın mı (varsayılan n) ? (y/n): ").strip().lower()
     if auto_booster in ['y', 'n', '']:
         auto_booster = auto_booster or 'n'
         break
     else:
-        print("Masukkan 'y' atau 'n'.")
+        print("Giriş yap 'y' yada 'n'.")
 
 
 while True:
-    auto_claim_combo = input("Auto claim daily combo (default n) ? (y/n): ").strip().lower()
+    auto_claim_combo = input("Günlük kombo alınsın mı (varsayılan n) ? (y/n): ").strip().lower()
     if auto_claim_combo in ['y', 'n', '']:
         auto_claim_combo = auto_claim_combo or 'n'
         break
     else:
-        print("Masukkan 'y' atau 'n'.")
+        print("Giriş yap 'y' yada 'n'.")
 
 if auto_claim_combo == 'y':
     while True:
-        combo_input = input("Masukkan combo (misal: 1,3,2,4,4,3,2,1): ").strip()
+        combo_input = input("Günlük combo (örnek: 1,3,2,4,4,3,2,1): ").strip()
         if combo_input:
             vector = combo_input
             break
         else:
-            print("Masukkan combo yang valid.")
+            print("Geçerli bir kombinasyon girin.")
 
 
 # Jalankan fungsi main() dan simpan hasilnya
