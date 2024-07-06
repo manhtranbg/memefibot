@@ -508,7 +508,7 @@ def animate_energy_recharge(duration):
     while time.time() < end_time:
         remaining_time = int(end_time - time.time())
         for frame in frames:
-            print(f"\r🪫 MEnerjiyi yeniden doldurun {frame} - Kalan {remaining_time} detik         ", end="", flush=True)
+            print(f"\r🪫 MEnerjiyi yeniden doldurun {frame} - Kalan {remaining_time} saniye         ", end="", flush=True)
             time.sleep(0.25)
     print("\r🔋 Enerji Doldu.                            ", flush=True)     
 # while True:
